@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Predictive Maintenance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Predictive Maintenance Dashboard</h1>
+            <p>Industrial equipment failure-risk prediction demo for portfolio use.</p>
+            <div class="status {{ 'ready' if model_ready else 'not-ready' }}">
+                Model status: {{ 'Ready' if model_ready else 'Not trained yet' }}
+            </div>
+        </header>
+
+        <section class="grid">
+            <div class="card">
+                <h2>Input Telemetry</h2>
+                <form id="predict-form">
+                    <label>Temperature (°C)
+                        <input type="number" step="0.1" name="temperature" value="88" required />
+                    </label>
+                    <label>Vibration (mm/s)
+                        <input type="number" step="0.1" name="vibration" value="6.2" required />
+                    </label>
+                    <label>Pressure (bar)
+                        <input type="number" step="0.1" name="pressure" value="42" required />
+                    </label>
+                    <label>RPM
+                        <input type="number" step="1" name="rpm" value="2950" required />
+                    </label>
+                    <label>Runtime Hours
+                        <input type="number" step="1" name="runtime_hours" value="12400" required />
+                    </label>
+                    <label>Load (%)
+                        <input type="number" step="0.1" name="load_percent" value="86" required />
+                    </label>
+                    <label>Oil Quality Index
+                        <input type="number" step="0.1" name="oil_quality_index" value="58" required />
+                    </label>
+                    <button type="submit">Predict Failure Risk</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Prediction Result</h2>
+                <div id="result" class="result empty">Submit telemetry to get a prediction.</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Sample Operating Guidance</h2>
+            <ul>
+                <li><strong>Low risk:</strong> Normal monitoring.</li>
+                <li><strong>Medium risk:</strong> Maintenance planning recommended.</li>
+                <li><strong>High risk:</strong> Urgent inspection recommended.</li>
+            </ul>
+        </section>
+    </div>
+
+    <script>
+        const form = document.getElementById('predict-form');
+        const resultEl = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            Object.keys(payload).forEach(key => {
+                payload[key] = Number(payload[key]);
+            });
+
+            resultEl.className = 'result';
+            resultEl.textContent = 'Calculating...';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+
+                resultEl.className = `result ${data.risk_level.toLowerCase()}`;
+                resultEl.innerHTML = `
+                    <div class="metric"><span>Failure Probability</span><strong>${(data.failure_probability * 100).toFixed(2)}%</strong></div>
+                    <div class="metric"><span>Risk Level</span><strong>${data.risk_level}</strong></div>
+                    <div class="metric"><span>Prediction</span><strong>${data.failure_prediction === 1 ? 'Potential failure' : 'No immediate failure signal'}</strong></div>
+                    <p><strong>Recommendation:</strong> ${data.recommendation}</p>
+                `;
+            } catch (err) {
+                resultEl.className = 'result error';
+                resultEl.textContent = err.message;
+            }
+        });
+    </script>
+</body>
+</html>

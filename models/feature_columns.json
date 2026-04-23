@@ -1,0 +1,9 @@
+[
+  "temperature",
+  "vibration",
+  "pressure",
+  "rpm",
+  "runtime_hours",
+  "load_percent",
+  "oil_quality_index"
+]

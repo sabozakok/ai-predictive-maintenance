@@ -1,0 +1,29 @@
+{
+  "healthy_equipment": {
+    "temperature": 65,
+    "vibration": 2.5,
+    "pressure": 62,
+    "rpm": 2600,
+    "runtime_hours": 5000,
+    "load_percent": 55,
+    "oil_quality_index": 82
+  },
+  "warning_condition": {
+    "temperature": 84,
+    "vibration": 5.8,
+    "pressure": 45,
+    "rpm": 3000,
+    "runtime_hours": 12000,
+    "load_percent": 82,
+    "oil_quality_index": 61
+  },
+  "critical_condition": {
+    "temperature": 102,
+    "vibration": 8.7,
+    "pressure": 35,
+    "rpm": 3400,
+    "runtime_hours": 22000,
+    "load_percent": 94,
+    "oil_quality_index": 38
+  }
+}
